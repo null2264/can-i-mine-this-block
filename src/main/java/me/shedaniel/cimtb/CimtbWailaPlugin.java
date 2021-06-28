@@ -19,12 +19,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-public class CimtbWailaPlugin implements IWailaPlugin, IComponentProvider {
+public class CimtbWailaPlugin implements IWailaPlugin, IComponentProvider
+{
     @Override
     public void register(IRegistrar registrar) {
         registrar.registerComponentProvider(this, TooltipPosition.BODY, Block.class);
     }
-    
+
     @Override
     public void appendBody(List<Text> tooltipTexts, IDataAccessor accessor, IPluginConfig config) {
         BlockState state = accessor.getBlockState();
@@ -34,22 +35,22 @@ public class CimtbWailaPlugin implements IWailaPlugin, IComponentProvider {
         ItemStack stack = player.getMainHandStack();
         if (state.isAir() || state.getHardness(world, position) == -1)
             return;
-        
+
         Optional<Pair<ToolHandler, Integer>> optionalEffectiveTool = ToolHandler.TOOL_HANDLERS.stream()
-                .map(handler -> new Pair<>(handler, handler.supportsBlock(state, player)))
-                .min(Comparator.comparing(Pair::getRight, Comparator.nullsLast(Comparator.naturalOrder())));
-        
+            .map(handler -> new Pair<>(handler, handler.supportsBlock(state, player)))
+            .min(Comparator.comparing(Pair::getRight, Comparator.nullsLast(Comparator.naturalOrder())));
+
         if (optionalEffectiveTool.isPresent()) {
             Pair<ToolHandler, Integer> entry = optionalEffectiveTool.get();
             if (entry.getRight() == null) return;
-            
+
             ToolHandler handler = entry.getLeft();
             int level = entry.getRight();
-            
+
             boolean harvestable = !state.isToolRequired() || (!stack.isEmpty() && Cimtb.isEffective(stack, state));
             tooltipTexts.add(new TranslatableText("cimtb.harvestable.symbol." + harvestable).append(new TranslatableText("cimtb.harvestable").formatted(Formatting.GRAY)));
             tooltipTexts.add(new TranslatableText("cimtb.effective_tool").formatted(Formatting.GRAY).append(handler.getToolDisplay()));
-            
+
             if (level > 0) {
                 int[] textColor = {11184810};
                 String text = level + "";
@@ -59,12 +60,12 @@ public class CimtbWailaPlugin implements IWailaPlugin, IComponentProvider {
                         textColor[0] = Integer.parseInt(translate.substring(0, translate.indexOf(':')));
                         translate = translate.substring(translate.indexOf(':') + 1);
                     }
-                    
+
                     text = I18n.translate("cimtb.harvest_level.level.format", translate, level);
                 }
-                
+
                 tooltipTexts.add(new TranslatableText("cimtb.harvest_level").formatted(Formatting.GRAY).append(new LiteralText(text).styled(
-                        style -> style.withColor(TextColor.fromRgb(textColor[0]))
+                    style -> style.withColor(TextColor.fromRgb(textColor[0]))
                 )));
             }
         }

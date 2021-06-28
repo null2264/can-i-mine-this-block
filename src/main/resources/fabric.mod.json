@@ -12,16 +12,14 @@
   "depends": {
     "fabricloader": ">=0.4.0",
     "fabric": "*",
-    "waila": "*"
+    "waila": "*",
+    "java": ">=16"
   },
   "entrypoints": {
     "client": [
       "me.shedaniel.cimtb.Cimtb"
     ]
   },
-  "mixins": [
-    "mixin.cimtb.json"
-  ],
   "custom": {
     "waila:plugins": {
       "id": "cimtb:cimtb_plugin",

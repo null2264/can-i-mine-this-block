@@ -18,37 +18,39 @@ import net.minecraft.util.registry.Registry;
 import java.util.List;
 import java.util.Map;
 
-public final class ToolHandler {
+public final class ToolHandler
+{
     public static final List<ToolHandler> TOOL_HANDLERS = Lists.newArrayList();
-    
+
     public final Tag.Identified<Item> tag;
     public final Item defaultTool;
     private final Lazy<Integer> maximumLevel = new Lazy<>(() -> {
         return Math.max(
-                4,
-                Registry.BLOCK.stream()
-                        .map(ToolManagerImpl::entryNullable)
-                        .map(this::getMaxOfEntry)
-                        .max(Integer::compareTo)
-                        .orElse(0)
+            4,
+            Registry.BLOCK.stream()
+                .map(ToolManagerImpl::entryNullable)
+                .map(this::getMaxOfEntry)
+                .max(Integer::compareTo)
+                .orElse(0)
         );
     });
-    
+
     private int getMaxOfEntry(ToolManagerImpl.Entry entry) {
         if (entry != null)
             return entry.getMiningLevel(tag);
         return -1;
     }
-    
+
     public ToolHandler(Map.Entry<Tag<Item>, Item> entry) {
         this.tag = (Tag.Identified<Item>) entry.getKey();
         this.defaultTool = entry.getValue();
     }
-    
+
     private boolean supportsTool(ItemStack stack) {
-        return stack.getItem().isIn(tag);
+        return tag.contains(stack.getItem());
+        // return stack.getItem().isIn(tag);
     }
-    
+
     public Integer supportsBlock(BlockState state, LivingEntity user) {
         ItemStack itemStack = new ItemStack(defaultTool);
         if (defaultToolSupportsMutableLevel()) {
@@ -66,15 +68,15 @@ public final class ToolHandler {
         }
         return null;
     }
-    
+
     private boolean defaultToolSupportsMutableLevel() {
         return defaultTool instanceof ToolItem && ((ToolItem) defaultTool).getMaterial() instanceof MutableToolMaterial;
     }
-    
+
     private void setDefaultToolSupportsMutableLevel(int level) {
         ((MutableToolMaterial) ((ToolItem) defaultTool).getMaterial()).miningLevel = level;
     }
-    
+
     private int getToolMiningLevel(ItemStack stack, BlockState state, LivingEntity user) {
         Item item = stack.getItem();
         if (item instanceof DynamicAttributeTool)
@@ -83,7 +85,7 @@ public final class ToolHandler {
             return ((ToolItem) item).getMaterial().getMiningLevel();
         return 0;
     }
-    
+
     public Text getToolDisplay() {
         return new TranslatableText("cimtb.effective_tool." + tag.getId().getNamespace() + "." + tag.getId().getPath()).formatted(Formatting.DARK_GREEN);
     }
